@@ -1,6 +1,6 @@
 from enum import Enum
 
 
-class Transactiontype(Enum):
-    INCOME = "income"
-    EXPENSE = "expense"
+class TransactionType(str, Enum):
+    income = "income"
+    expense = "expense"

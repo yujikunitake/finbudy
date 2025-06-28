@@ -9,9 +9,9 @@ class TransactionsRepository:
             try:
                 new_transaction = Transactions(
                     user_id=user_id,
-                    type=transaction.type,
+                    type=transaction.type.value,
                     value=transaction.value,
-                    date=transaction.value,
+                    date=transaction.date,
                     description=transaction.description
                 )
 

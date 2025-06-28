@@ -1,5 +1,5 @@
 from app.database.configs.base import Base
-from app.database.entities.enums import Transactiontype
+from app.database.entities.enums import TransactionType
 from sqlalchemy import Column, Numeric, Integer, Enum, ForeignKey, Date, Text, DateTime, func
 
 
@@ -9,7 +9,7 @@ class Transactions(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    type = Column(Enum(Transactiontype, name="transaction_type"), nullable=False)
+    type = Column(Enum(TransactionType, name="transaction_type"), nullable=False)
     value = Column(Numeric(10, 2), nullable=False)
     date = Column(Date, nullable=False)
     description = Column(Text)

@@ -31,7 +31,7 @@ def decode_token(token: str) -> dict:
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token signature os structure invalid.",
+            detail="Token signature or structure invalid.",
             headers={"WWW-Authenticate": "Bearer"}
         )
 

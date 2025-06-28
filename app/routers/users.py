@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
-from app.schemas.users import UserCreate, UserRead, UserLogin
+from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordRequestForm
+from app.schemas.users import UserCreate, UserRead
 from app.database.repository.users_repository import UsersRepository
 from app.core.security import verify_password
 from app.core.jwt import create_access_token
@@ -20,20 +21,16 @@ def register_user(user: UserCreate):
     
 
 @users_router.post("/login", status_code=status.HTTP_200_OK)
-def login(credentials: UserLogin):
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
     repo = UsersRepository()
-    user = repo.get_user_by_email(credentials.email)
+    user = repo.get_user_by_email(form_data.username)
 
-    if not user or not verify_password(credentials.password, user.password):
+    if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário ou senha incorretos.")
     
     token = create_access_token({"sub": str(user.id)})
 
     return {
-        "status": "success",
-        "message": "Login realizado com sucesso.",
-        "data": {
-            "access_token": token, 
-            "token_type": "bearer"
-        }
+        "access_token": token, 
+        "token_type": "bearer"
     }
