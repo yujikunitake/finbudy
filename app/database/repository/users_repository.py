@@ -14,18 +14,18 @@ class UsersRepository:
                 
                 hashed_password = get_password_hash(user.password)
 
-                insert_data = Users(
+                new_user = Users(
                     email=user.email,
                     password=hashed_password,
                     name=user.name,
                     birth_date=user.birth_date
                 )
 
-                db.session.add(insert_data)
+                db.session.add(new_user)
                 db.session.commit()
-                db.session.refresh(insert_data)
+                db.session.refresh(new_user)
                 
-                return insert_data
+                return new_user
             
             except Exception as e:
                 db.session.rollback()
