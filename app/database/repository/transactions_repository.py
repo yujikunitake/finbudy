@@ -1,7 +1,6 @@
 from app.database.configs.connection import PostgresConnectionHandler
 from app.database.entities.transactions import Transactions
 from app.schemas.transactions import TransactionCreate
-from app.core.jwt import get_current_user
 
 
 class TransactionsRepository:
