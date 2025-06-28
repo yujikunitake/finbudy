@@ -1,6 +1,9 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.exc import SQLAlchemyError
+from typing import List, Optional
+from datetime import date
 from app.schemas.transactions import TransactionCreate, TransactionRead
+from app.database.entities.enums import TransactionType
 from app.database.repository.transactions_repository import TransactionsRepository
 from app.core.jwt import get_current_user
 
@@ -22,3 +25,36 @@ def register_transaction(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(sqle))
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@transactions_router.get("/transactions", response_model=List[TransactionRead])
+def list_transaction(
+    user_id: int =  Depends(get_current_user),
+    type:  Optional[TransactionType] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    min_value: Optional[float] = None,
+    max_value: Optional[float] = None,
+    description: Optional[str] = None
+):
+    repo = TransactionsRepository()
+    try:
+        transactions = repo.get_transactions_filtered(
+            user_id=user_id,
+            type=type,
+            start_date=start_date,
+            end_date=end_date,
+            min_value=min_value,
+            max_value=max_value,
+            description=description
+        )
+
+        return transactions
+    
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except SQLAlchemyError as sqle:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(sqle))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    
