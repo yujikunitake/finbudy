@@ -115,7 +115,7 @@ class TransactionsRepository:
                 db.session.rollback()
                 raise Exception(f"Erro ao delerar transação: {str(e)}")
 
-    def get_balance(self, user_id: int) -> float:
+    def get_summary(self, user_id: int) -> float:
         with PostgresConnectionHandler() as db:
             try:
                 income = db.session.query(

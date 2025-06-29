@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.exc import SQLAlchemyError
 from typing import List, Optional
 from datetime import date
-from app.schemas.transactions import TransactionCreate, TransactionRead, TransactionUpdate, BalanceRead
+from app.schemas.transactions import TransactionCreate, TransactionRead, TransactionUpdate, SummaryRead
 from app.database.entities.enums import TransactionType
 from app.database.repository.transactions_repository import TransactionsRepository
 from app.core.jwt import get_current_user
@@ -10,7 +10,7 @@ from app.core.jwt import get_current_user
 transactions_router = APIRouter(prefix="/transactions", tags=["transactions"])
 
 
-@transactions_router.post("/register_transaction", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
+@transactions_router.post("/", response_model=TransactionRead, status_code=status.HTTP_201_CREATED)
 def register_transaction(
     transaction: TransactionCreate,
     user_id: int = Depends(get_current_user),
@@ -27,7 +27,7 @@ def register_transaction(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@transactions_router.get("/transactions", response_model=List[TransactionRead], status_code=status.HTTP_200_OK)
+@transactions_router.get("/", response_model=List[TransactionRead], status_code=status.HTTP_200_OK)
 def list_transaction(
     user_id: int =  Depends(get_current_user),
     type:  Optional[TransactionType] = None,
@@ -95,13 +95,13 @@ def delete_transaction(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@transactions_router.get("/balance", response_model=BalanceRead, status_code=status.HTTP_200_OK)
-def get_balance(user_id: int = Depends(get_current_user)):
+@transactions_router.get("/summary", response_model=SummaryRead, status_code=status.HTTP_200_OK)
+def get_summary(user_id: int = Depends(get_current_user)):
     repo = TransactionsRepository()
     try:
-        balance = repo.get_balance(user_id)
+        summary = repo.get_summary(user_id)
 
-        return balance
+        return summary
     
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))

@@ -33,7 +33,7 @@ class TransactionUpdate(BaseModel):
 
 
 
-class BalanceRead(BaseModel):
+class SummaryRead(BaseModel):
     total_income: float
     total_expense: float
     balance: float
