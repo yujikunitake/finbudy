@@ -27,7 +27,7 @@ def register_transaction(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@transactions_router.get("/transactions", response_model=List[TransactionRead])
+@transactions_router.get("/transactions", response_model=List[TransactionRead], status_code=status.HTTP_200_OK)
 def list_transaction(
     user_id: int =  Depends(get_current_user),
     type:  Optional[TransactionType] = None,
@@ -58,6 +58,7 @@ def list_transaction(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
+
 @transactions_router.get("/balance", response_model=BalanceRead, status_code=status.HTTP_200_OK)
 def get_balance(user_id: int = Depends(get_current_user)):
     repo = TransactionsRepository()
