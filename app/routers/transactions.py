@@ -65,7 +65,7 @@ def get_balance(user_id: int = Depends(get_current_user)):
     try:
         balance = repo.get_balance(user_id)
 
-        return BalanceRead(balance=balance)
+        return balance
     except ValueError as ve:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
     except SQLAlchemyError as sqle:

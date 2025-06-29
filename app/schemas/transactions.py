@@ -25,4 +25,6 @@ class TransactionRead(BaseModel):
     }
 
 class BalanceRead(BaseModel):
+    total_income: float
+    total_expense: float
     balance: float

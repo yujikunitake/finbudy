@@ -4,7 +4,7 @@ from app.schemas.transactions import TransactionCreate
 from app.database.entities.enums import TransactionType
 from datetime import date
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func, case
+from sqlalchemy import func
 
 
 class TransactionsRepository:
@@ -71,24 +71,19 @@ class TransactionsRepository:
     def get_balance(self, user_id: int) -> float:
         with PostgresConnectionHandler() as db:
             try:
-                balance_query = (
-                    db.session.query(
-                        func.coalesce(
-                            func.sum(
-                                case(
-                                    (Transactions.type == "income", Transactions.value),
-                                    (Transactions.type == "expense", -Transactions.value),
-                                    else_=0.0
-                                )
-                            ), 0.0
-                        ).label("balance")
-                    )
-                    .filter(Transactions.user_id == user_id)
-                )
-
-                balance = balance_query.scalar()
+                income = db.session.query(
+                    func.coalesce(func.sum(Transactions.value), 0)
+                    ).filter_by(user_id=user_id, type=TransactionType.income.value).scalar()
                 
-                return balance
+                expense = db.session.query(
+                    func.coalesce(func.sum(Transactions.value), 0)
+                ).filter_by(user_id=user_id, type=TransactionType.expense.value).scalar()
+
+                return {
+                    "total_income": income,
+                    "total_expense": expense,
+                    "balance": income - expense
+                }
             
             except SQLAlchemyError as sqle:
                 db.session.rollback()
