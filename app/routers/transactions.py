@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.exc import SQLAlchemyError
 from typing import List, Optional
 from datetime import date
-from app.schemas.transactions import TransactionCreate, TransactionRead
+from app.schemas.transactions import TransactionCreate, TransactionRead, BalanceRead
 from app.database.entities.enums import TransactionType
 from app.database.repository.transactions_repository import TransactionsRepository
 from app.core.jwt import get_current_user
@@ -58,3 +58,16 @@ def list_transaction(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
+@transactions_router.get("/balance", response_model=BalanceRead, status_code=status.HTTP_200_OK)
+def get_balance(user_id: int = Depends(get_current_user)):
+    repo = TransactionsRepository()
+    try:
+        balance = repo.get_balance(user_id)
+
+        return BalanceRead(balance=balance)
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except SQLAlchemyError as sqle:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(sqle))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

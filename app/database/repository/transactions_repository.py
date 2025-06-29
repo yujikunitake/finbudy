@@ -4,6 +4,7 @@ from app.schemas.transactions import TransactionCreate
 from app.database.entities.enums import TransactionType
 from datetime import date
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import func, case
 
 
 class TransactionsRepository:
@@ -31,7 +32,6 @@ class TransactionsRepository:
                 db.session.rollback()
                 raise Exception(f"Erro ao criar usuário: {str(e)}")
             
-    
     def get_transactions_filtered(
             self,
             user_id: int,
@@ -67,3 +67,33 @@ class TransactionsRepository:
             except Exception as e:
                 db.session.rollback()
                 raise Exception(f"Erro ao consultar transações: {str(e)}")
+
+    def get_balance(self, user_id: int) -> float:
+        with PostgresConnectionHandler() as db:
+            try:
+                balance_query = (
+                    db.session.query(
+                        func.coalesce(
+                            func.sum(
+                                case(
+                                    (Transactions.type == "income", Transactions.value),
+                                    (Transactions.type == "expense", -Transactions.value),
+                                    else_=0.0
+                                )
+                            ), 0.0
+                        ).label("balance")
+                    )
+                    .filter(Transactions.user_id == user_id)
+                )
+
+                balance = balance_query.scalar()
+                
+                return balance
+            
+            except SQLAlchemyError as sqle:
+                db.session.rollback()
+                raise Exception(f"Erro de banco de dados ao buscar saldo: {str(sqle)}")
+            except Exception as e:
+                db.session.rollback()
+                raise Exception(f"Erro ao consultar transações: {str(e)}")
+            

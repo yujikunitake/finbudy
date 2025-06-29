@@ -23,3 +23,6 @@ class TransactionRead(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+class BalanceRead(BaseModel):
+    balance: float
