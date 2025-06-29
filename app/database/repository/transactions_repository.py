@@ -95,7 +95,25 @@ class TransactionsRepository:
                 raise Exception(f"Erro de banco de dados ao editar transação: {str(sqle)}")
             except Exception as e:
                 db.session.rollback()
-                raise Exception(f"Erro ao atualizar transações: {str(e)}")
+                raise Exception(f"Erro ao atualizar transação: {str(e)}")
+
+    def delete_transaction(self, transaction_id: int, user_id: int):
+        with PostgresConnectionHandler() as db:
+            try:
+                transaction = db.session.query(Transactions).filter_by(id=transaction_id, user_id=user_id).first()
+
+                if not transaction:
+                    raise ValueError("Transação não localizada.")
+                
+                db.session.delete(transaction)
+                db.session.commit()
+
+            except SQLAlchemyError as sqle:
+                db.session.rollback()
+                raise Exception(f"Erro de banco de dados ao deletar transação: {str(sqle)}")
+            except Exception as e:
+                db.session.rollback()
+                raise Exception(f"Erro ao delerar transação: {str(e)}")
 
     def get_balance(self, user_id: int) -> float:
         with PostgresConnectionHandler() as db:

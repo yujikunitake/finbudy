@@ -79,6 +79,22 @@ def update_transaction(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
+@transactions_router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_transaction(
+    transaction_id: int,
+    user_id: int = Depends(get_current_user)
+):
+    repo = TransactionsRepository()
+    try:
+        repo.delete_transaction(transaction_id, user_id)
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+    except SQLAlchemyError as sqle:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(sqle))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
 @transactions_router.get("/balance", response_model=BalanceRead, status_code=status.HTTP_200_OK)
 def get_balance(user_id: int = Depends(get_current_user)):
     repo = TransactionsRepository()
