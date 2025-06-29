@@ -24,6 +24,15 @@ class TransactionRead(BaseModel):
         "from_attributes": True
     }
 
+
+class TransactionUpdate(BaseModel):
+    type: Optional[TransactionType] = None
+    value: Optional[float] = None
+    transaction_date: Optional[date] = None
+    description: Optional[str] = None
+
+
+
 class BalanceRead(BaseModel):
     total_income: float
     total_expense: float

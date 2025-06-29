@@ -1,6 +1,6 @@
 from app.database.configs.connection import PostgresConnectionHandler
 from app.database.entities.transactions import Transactions
-from app.schemas.transactions import TransactionCreate
+from app.schemas.transactions import TransactionCreate, TransactionUpdate
 from app.database.entities.enums import TransactionType
 from datetime import date
 from sqlalchemy.exc import SQLAlchemyError
@@ -67,6 +67,35 @@ class TransactionsRepository:
             except Exception as e:
                 db.session.rollback()
                 raise Exception(f"Erro ao consultar transações: {str(e)}")
+
+    def update_transaction(self, transaction_id: int, user_id: int, updates: TransactionUpdate):
+        with PostgresConnectionHandler() as db:
+            try:
+                transaction = db.session.query(Transactions).filter_by(id=transaction_id, user_id=user_id).first()
+
+                if not transaction:
+                    raise ValueError("Transação não localizada.")
+                
+                if updates.type is not None:
+                    transaction.type = updates.type.value
+                if updates.value is not None:
+                    transaction.value = updates.value
+                if updates.transaction_date is not None:
+                    transaction.date = updates.transaction_date
+                if updates.description is not None:
+                    transaction.description = updates.description
+
+                db.session.commit()
+                db.session.refresh(transaction)
+
+                return transaction
+
+            except SQLAlchemyError as sqle:
+                db.session.rollback()
+                raise Exception(f"Erro de banco de dados ao editar transação: {str(sqle)}")
+            except Exception as e:
+                db.session.rollback()
+                raise Exception(f"Erro ao atualizar transações: {str(e)}")
 
     def get_balance(self, user_id: int) -> float:
         with PostgresConnectionHandler() as db:
